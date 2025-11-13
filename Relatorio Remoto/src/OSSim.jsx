@@ -1,53 +1,43 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-function OSForm() {
+function OSSim() {
   const [formData, setFormData] = useState({
     cliente: "",
     produto: "",
     descricao: "",
+    tag: "",
     status: "Aberta",
   });
 
   const [ordens, setOrdens] = useState([]);
+  const navigate = useNavigate();
 
   function handleChange(e) {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   }
 
   function handleSubmit(e) {
     e.preventDefault();
-    const novaOS = { ...formData, id: Date.now() };
-    setOrdens([...ordens, novaOS]);
-    setFormData({ cliente: "", produto: "", descricao: "", status: "Aberta" });
+    const novaOS = {
+      ...formData,
+      id: Date.now(),
+      numero: Math.floor(1000 + Math.random() * 9000),
+      data: new Date().toLocaleString(),
+    };
+    setOrdens(prev => [...prev, novaOS]);
+    setFormData({ cliente: "", produto: "", descricao: "", tag: "", status: "Aberta" });
   }
 
   return (
-    <div style={{ padding: "1rem" }}>
+    <div>
       <h2>Simulador de Ordem de Serviço</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="cliente"
-          placeholder="Nome do cliente"
-          value={formData.cliente}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
-          name="produto"
-          placeholder="Produto"
-          value={formData.produto}
-          onChange={handleChange}
-          required
-        />
-        <textarea
-          name="descricao"
-          placeholder="Descrição do problema"
-          value={formData.descricao}
-          onChange={handleChange}
-          required
-        />
+        <input name="cliente" value={formData.cliente} onChange={handleChange} placeholder="Cliente" required />
+        <input name="produto" value={formData.produto} onChange={handleChange} placeholder="Produto" required />
+        <textarea name="descricao" value={formData.descricao} onChange={handleChange} placeholder="Descrição" required />
+        <textarea name="tag" value={formData.tag} onChange={handleChange} placeholder="TAG" required />
         <select name="status" value={formData.status} onChange={handleChange}>
           <option>Aberta</option>
           <option>Em andamento</option>
@@ -56,12 +46,14 @@ function OSForm() {
         <button type="submit">Criar OS</button>
       </form>
 
-      <hr />
-      <h3>Ordens Criadas:</h3>
+      <h3>Ordens Criadas</h3>
       <ul>
-        {ordens.map((os) => (
+        {ordens.map(os => (
           <li key={os.id}>
-            <strong>{os.cliente}</strong> - {os.produto} ({os.status})
+            #{os.numero} — {os.cliente} ({os.status}){" "}
+            <button onClick={() => navigate(`/os/${os.numero}`, { state: { os } })}>
+              Ver detalhes
+            </button>
           </li>
         ))}
       </ul>
@@ -69,4 +61,4 @@ function OSForm() {
   );
 }
 
-export default OSForm;
+export default OSSim;
